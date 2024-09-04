@@ -13,9 +13,6 @@ def f(x):
     return tf.reduce_sum(tf.square(diff) / 2)
 
 def compute_gradient(f, x_k, i_k):
-    x_k = tf.convert_to_tensor(x_k, dtype=tf.float32)
-    x_k = tf.Variable(x_k)
-    
     with tf.GradientTape() as tape:
         tape.watch(x_k)
         value = f(x_k)
