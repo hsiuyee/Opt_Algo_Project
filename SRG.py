@@ -14,6 +14,7 @@ def f(x):
     diff = x - a
     return tf.reduce_sum(tf.square(diff) / 2)
 
+
 def compute_gradient(f, x_k, i_k):
     n = tf.shape(x_k)[0]
     a = tf.zeros_like(x_k)
@@ -25,6 +26,7 @@ def compute_gradient(f, x_k, i_k):
         [x_k[i_k] - a[i_k]]
     )
     return result_vector
+
 
 def SRG(num_iterations=10000, d=20, n=20):
     # default
@@ -87,6 +89,7 @@ def SRG(num_iterations=10000, d=20, n=20):
     plt.ylabel('Error')
     plt.title('Error over Iterations')
     plt.show()
+
 
 if __name__ == '__main__':
     SRG()

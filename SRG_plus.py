@@ -4,7 +4,8 @@
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-    
+
+
 def f(x):
     # f_i(x) = (x - a_i) ^ 2 / 2
         # a_i = 1 if i = n - 1
@@ -30,7 +31,6 @@ def compute_gradient(f, x_k, i_k):
     return result_vector
 
 
-# ------------------------------------------------------------------------------------------------ modify
 def maximally_couples(p, q, n):
     # step 1: initial
     X_star = np.random.choice(np.arange(n), p=p)
@@ -48,7 +48,6 @@ def maximally_couples(p, q, n):
             W_hat = np.random.uniform(0, 1)
         Y_star = Y_hat
         return X_star, Y_star
-# ------------------------------------------------------------------------------------------------ modify
 
 
 def SRG_plus(num_iterations=10000, d=20, n=20):
@@ -119,6 +118,7 @@ def SRG_plus(num_iterations=10000, d=20, n=20):
     plt.ylabel('Error')
     plt.title('Error over Iterations')
     plt.show()
+
 
 if __name__ == '__main__':
     SRG_plus()
