@@ -4,6 +4,8 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
     
+eps = 1e-7
+
 def f(x):
     # f_i(x) = (x - a_i) ^ 2 / 2
         # a_i = 1 if i = n - 1
@@ -12,7 +14,7 @@ def f(x):
     a = tf.zeros_like(x)
     a = tf.tensor_scatter_nd_update(a, [[n-1]], [1]) 
     diff = x - a
-    return tf.reduce_sum(tf.square(diff) / 2)
+    return tf.square(diff) / 2
 
 
 def compute_gradient(f, x_k, i_k):
@@ -28,16 +30,28 @@ def compute_gradient(f, x_k, i_k):
     return result_vector
 
 
-def SRG(num_iterations=10000, d=20, n=20):
+def SRG(d=8, n=8):
+    num_iterations = n * 100
     # default
-    x_star = tf.Variable([1 / n for i in range(n)])
+    x_star = tf.Variable([1 / n for _ in range(n)])
+    
     
     # step 1: Parameters
-    alpha = np.linspace(0.01, 0.0001, num_iterations)
+    # alpha = np.linspace(0.01, 0.0001, num_iterations)
+    # alpha = 0.01 / (1 + 0.0001 * np.arange(num_iterations))
+    # alpha = 0.01 / (1 + 0.00005 * np.arange(num_iterations))
+    alpha = np.ones(num_iterations) * 0.01
+    alpha[1000:] = 0.01 / (1 + 0.0001 * np.arange(num_iterations - 1000))
+
+
     theta = np.linspace(0.5, 0.5, num_iterations) 
+    # theta = 0.5 / (1 + 0.0001 * np.arange(num_iterations))  # 隨著迭代減少隨機性
 
     # step 2: Initialization
-    x_old = tf.Variable(tf.random.normal([d], dtype=tf.float32))
+    x_old = tf.Variable(tf.random.uniform([d], minval=-5, maxval=5, dtype=tf.float32))
+    # x_old = tf.Variable(tf.random.uniform([d], minval=0, maxval=1, dtype=tf.float32))
+    x_0 = x_old
+    print("x_0", x_0)
     g_old = [tf.random.normal([n], dtype=tf.float32) for _ in range(n)]
     g_old_norm = tf.Variable([tf.norm(g) for g in g_old], dtype=tf.float32)
 
@@ -48,7 +62,8 @@ def SRG(num_iterations=10000, d=20, n=20):
     for k in range(num_iterations):
         # step 4: update pk
         q_k = tf.cast(g_old_norm / tf.reduce_sum(g_old_norm), tf.float32).numpy()
-        p_k = (1 - theta[k]) * q_k + theta[k] / n
+        q_k_temp = tf.clip_by_value(q_k, 1e-12, 1.0)
+        p_k = (1 - theta[k]) * q_k_temp + theta[k] / n
 
         # step 5: update bk
         b_k = np.random.binomial(n=1, p=theta[k])
@@ -63,11 +78,18 @@ def SRG(num_iterations=10000, d=20, n=20):
 
         # step 7: update x_{k+1}
         gradient = compute_gradient(f, x_old, i_k)
-        x_new = x_old - alpha[k] * gradient / (n * p_k[i_k])
+        x_new = x_old - alpha[k] * gradient / (n * max(p_k[i_k], 1e-3))
         # if k % 1000 == 0:
         #     print("gradient", gradient)
         gradient_list.append(gradient)
-        error_list.append(tf.reduce_sum(tf.square(f(x_new) - f(x_star))))
+        error_list.append(tf.reduce_sum(tf.square(x_new - x_star)))
+        # error_list.append(tf.reduce_sum(tf.square(x_new - x_star)) / tf.reduce_sum(tf.square(x_0 - x_star)))
+
+        # if tf.reduce_sum(tf.square(x_new - x_star)) < eps:
+        #     break
+        # error_list.append(tf.math.log(tf.reduce_sum(tf.square(x_new - x_star) / tf.square(x_0 - x_star))))
+        if tf.reduce_sum(tf.square(x_new - x_star)) / tf.reduce_sum(tf.square(x_0 - x_star)) < eps:
+            break
 
         # step 8: update g_k_{j+1}
         g_new_norm = tf.Variable(tf.zeros(n, dtype=tf.float32))
@@ -80,10 +102,14 @@ def SRG(num_iterations=10000, d=20, n=20):
         # update
         x_old.assign(x_new)
         g_old_norm.assign(g_new_norm)
+        if k % 10 == 0:
+            for i in range(n):
+                g_new_norm[i].assign(tf.norm(compute_gradient(f, x_old, i)))
+
 
     # draw
-    print(x_old)
-    print(x_star)
+    print("x_old", x_old)
+    print("x_star", x_star)
     plt.plot(range(num_iterations), error_list)
     plt.xlabel('Iteration')
     plt.ylabel('Error')
