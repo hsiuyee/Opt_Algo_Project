@@ -7,6 +7,11 @@ import random
 
 eps = 1e-10
 
+def set_seed(seed=69):
+    random.seed(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+
 def f(x):
     # f_i(x) = (x - a_i) ^ 2 / 2
         # a_i = 1 if i = n - 1
@@ -32,13 +37,15 @@ def compute_gradient(x_k, i_k):
 
 
 def SRG(d=20, n=20):
+    set_seed(69)
     num_iterations = n * 30
     # default
     x_star = tf.constant([1 / n for _ in range(n)])
     
     # step 1: Parameters
     # alpha = np.linspace(0.5, 0.0001, num_iterations)
-    alpha = 0.7 / (1 + 0.01 * np.arange(num_iterations))
+    # alpha = 0.9 / (1 + 0.01 * np.arange(num_iterations))
+    alpha = 0.35 / (1 + 0.001 * np.arange(num_iterations))
     # alpha = 0.01 / (1 + 0.00005 * np.arange(num_iterations))
     # alpha = np.ones(num_iterations) * 0.01
     # alpha[1000:] = 0.01 / (1 + 0.0001 * np.arange(num_iterations - 1000))
@@ -50,7 +57,7 @@ def SRG(d=20, n=20):
     x_old = tf.Variable(tf.random.uniform([d], minval=-60, maxval=60, dtype=tf.float32))
     # x_old = tf.Variable(tf.random.uniform([d], minval=0, maxval=1, dtype=tf.float32))
     x_0 = tf.constant(x_old)
-    print("x_0", x_0)
+    # print("x_0", x_0)
     g_old = [tf.random.normal([n], dtype=tf.float32) for _ in range(n)]
     g_old_norm = tf.Variable([tf.norm(g) for g in g_old], dtype=tf.float32)
 
@@ -89,7 +96,7 @@ def SRG(d=20, n=20):
             if  b_k == 1 and i_k == i:
                 g_new_norm[i].assign(tf.norm(compute_gradient(x_old, i_k)))
             else:
-                g_new_norm[i].assign(g_old_norm[i])
+                g_new_norm[i].assign(abs(g_old_norm[i]))
 
         # update
         x_old.assign(x_new)
@@ -100,19 +107,20 @@ def SRG(d=20, n=20):
     
 
     # draw
-    print("x_old", x_old)
-    print("x_star", x_star)
-    print("error_list", error_list[-1])
-    plt.plot(np.arange(len(error_list)) * n / d, error_list, label="SRG", marker="v", color="green")
-    plt.yscale('log')
-    plt.xlabel('oracle calls / n')
-    plt.ylabel('relative error')
-    plt.title('Figure 1')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    # print("x_old", x_old)
+    # print("x_star", x_star)
+    # print("error_list", error_list[-1])
+    # plt.plot(np.arange(len(error_list)) * n / d, error_list, label="SRG", marker="v", color="green")
+    # plt.yscale('log')
+    # plt.xlabel('oracle calls / n')
+    # plt.ylabel('relative error')
+    # plt.title('Figure 1')
+    # plt.legend()
+    # plt.grid(True)
+    # plt.show()
+    return error_list
 
 
-if __name__ == '__main__':
-    random.seed(13)
-    SRG()
+# if __name__ == '__main__':
+#     set_seed(69)
+#     SRG()
