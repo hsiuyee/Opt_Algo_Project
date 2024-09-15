@@ -6,29 +6,26 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from matplotlib.ticker import LogFormatter, LogLocator
 
+eps = 1e-10
 
-def f(x):
-    # f_i(x) = (x - a_i) ^ 2 / 2
+def f(x, L):
+    # f_i(x) = L_i * (x - a_i) ^ 2 / 2
         # a_i = 1 if i = n - 1
         # a_i = 0 else
-        # n = 20
     n = tf.shape(x)[0]
     a = tf.zeros_like(x)
     a = tf.tensor_scatter_nd_update(a, [[n-1]], [1]) 
-    diff = x - a
-    return tf.reduce_sum(tf.square(diff) / 2)
+    result = ((x - a) * (x - a)) * L / 2
+    return result
 
 
-def compute_gradient(f, x_k, i_k):
+def compute_gradient(x_k, i_k, L):
     n = tf.shape(x_k)[0]
     a = tf.zeros_like(x_k)
     a = tf.tensor_scatter_nd_update(a, [[n-1]], [1]) 
-    
-    result_vector = tf.tensor_scatter_nd_update(
-        tf.zeros_like(x_k),
-        [[i_k]],
-        [x_k[i_k] - a[i_k]]
-    )
+    result_vector = tf.Variable(L * (x_k - a))
+    mask = tf.range(tf.shape(result_vector)[0]) == i_k
+    result_vector = tf.where(mask, result_vector, tf.zeros_like(result_vector))
     return result_vector
 
 
@@ -52,17 +49,19 @@ def maximally_couples(p, q, n):
 
 
 def SRG_plus(d=20, n=20):
-    num_iterations = 6000
+    num_iterations = n * 30
     # default
-    x_star = tf.Variable([1 / (n ** 2) for _ in range(n)])
+    x_star = tf.constant([1 / (n ** 2) for _ in range(n)])
 
     # step 1: Parameters
-    alpha = np.linspace(0.01, 0, num_iterations)
+    # alpha = np.linspace(0.01, 0, num_iterations)
+    # alpha = 0.01 / (1 + 0.0001 * np.arange(num_iterations))
+    alpha = 0.5 / (1 + 0.001 * np.arange(num_iterations))
     theta = np.linspace(0.5, 0.5, num_iterations) 
 
     # step 2: Initialization
-    x_old = tf.Variable(tf.random.normal([d], dtype=tf.float32))
-    x_0 = x_old
+    x_old = tf.Variable(tf.random.uniform([d], minval=-100000, maxval=100000, dtype=tf.float32))
+    x_0 = tf.constant(x_old)
     g_old = [tf.random.normal([n], dtype=tf.float32) for _ in range(n)]
     g_old_norm = tf.Variable([tf.norm(g) for g in g_old], dtype=tf.float32)
 
@@ -99,17 +98,19 @@ def SRG_plus(d=20, n=20):
 
 
         # step 7: update x_{k+1}
-        gradient = compute_gradient(f, x_old, i_k)
+        gradient = compute_gradient(x_old, i_k, L)
         x_new = x_old - alpha[k] * gradient / (n * p_k[i_k])
         gradient_list.append(gradient)
-        error_list.append(tf.reduce_sum(tf.square(x_new - x_star)))
+        error_list.append(tf.reduce_sum(tf.square(x_new - x_star)) / tf.reduce_sum(tf.square(x_0 - x_star)))
         # error_list.append(tf.math.log(tf.reduce_sum(tf.square(x_new - x_star) / tf.square(x_0 - x_star))))
+        if tf.reduce_sum(tf.square(x_new - x_star)) / tf.reduce_sum(tf.square(x_0 - x_star)) < eps:
+            break
 
         # step 8: update g_k_{j+1}
         g_new_norm = tf.Variable(tf.zeros(n, dtype=tf.float32))
         for j in range(n):
             if b_k == 1 and j == j_k:
-                g_new_norm[j].assign(tf.norm(compute_gradient(f, x_old, j)))
+                g_new_norm[j].assign(tf.norm(compute_gradient(x_old, j, L)))
             else:
                 g_new_norm[j].assign(g_old_norm[j])
 
