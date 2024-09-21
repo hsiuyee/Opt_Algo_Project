@@ -5,9 +5,9 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import random
 
-def combine():
-    error_list_SRG = SRG()
-    error_list_SRG_plus = SRG_plus()
+def combine(seed=69):
+    error_list_SRG = SRG(seed)
+    error_list_SRG_plus = SRG_plus(seed)
     plt.plot(np.arange(len(error_list_SRG)) * 20 / 20, error_list_SRG, label="SRG", marker="v", color="green")
     plt.plot(np.arange(len(error_list_SRG_plus)) * 20 / 20, error_list_SRG_plus, label="SRG+", marker="o", color="blue")
 
@@ -20,4 +20,4 @@ def combine():
     plt.show()
 
 if __name__ == '__main__':
-    combine()
+    combine(86)
