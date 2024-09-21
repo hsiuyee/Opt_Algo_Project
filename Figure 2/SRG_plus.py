@@ -59,13 +59,13 @@ def maximally_couples(p, q, n):
 
 
 def SRG_plus(d=20, n=20):
-    # set_seed(69)
+    set_seed(75) # 75
     num_iterations = n * 30
     # default
     x_star = 1 / (n ** 2)
 
     # step 1: Parameters
-    alpha = np.linspace(0.05, 0.001, num_iterations)
+    alpha = np.linspace(0.04, 0, num_iterations)
     # alpha = 0.9 / (1 + 0.01 * np.arange(num_iterations))
     # alpha = np.linspace(2, 0.5, num_iterations) 
     # alpha = 0.9 / (1 + 0.01 * np.arange(num_iterations))
@@ -143,7 +143,7 @@ def SRG_plus(d=20, n=20):
     plt.yscale('log')
     plt.xlabel('oracle calls / n')
     plt.ylabel('relative error')
-    plt.title('Figure 1')
+    plt.title('Figure 2')
     plt.legend()
     plt.grid(True)
     plt.show()
