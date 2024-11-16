@@ -3,6 +3,27 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 
+def sparse_to_dense(sparse_line, num_features):
+    """
+    Convert a sparse representation line from LIBSVM format to a dense vector.
+
+    Parameters:
+    - sparse_line: A line from the LIBSVM file (e.g., "1 1:0.5 3:0.8 5:0.2").
+    - num_features: Total number of features (dimensionality).
+
+    Returns:
+    - label: The label of the data point.
+    - dense_vector: The dense representation of the feature vector.
+    """
+    parts = sparse_line.strip().split()
+    label = int(parts[0])  # First value is the label
+    dense_vector = [0.0] * num_features
+    for item in parts[1:]:
+        index, value = item.split(":")
+        dense_vector[int(index) - 1] = float(value)  # Indices in LIBSVM start at 1
+    return label, dense_vector
+
+
 if __name__ == '__main__':
     fileNames = ['ijcnn1', 'mushrooms', 'phishing', 'w8a']
     for fileName in fileNames:
