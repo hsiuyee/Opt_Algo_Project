@@ -146,6 +146,8 @@ def SRG_plus(d=20, n=20):
     plt.title('Figure 2')
     plt.legend()
     plt.grid(True)
+
+    plt.savefig('figure2.png', dpi=300) 
     plt.show()
     return error_list
 
