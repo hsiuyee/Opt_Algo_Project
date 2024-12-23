@@ -22,7 +22,7 @@ if __name__ == '__main__':
     alpha = 0.9
     regularize = 'l2'
     learning_rate = 0.1
-    epochs = 30
+    epochs = 100
 
     ##############################################
     # load data and train module
