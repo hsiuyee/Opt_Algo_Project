@@ -19,13 +19,13 @@ def loadData(filePath, featureSize):
     return tensorX, tensorY
 
 
-def getDataLoader(dsetName, featureSize, batchSize=128, validSize=128):
+def getDataLoader(dsetName, featureSize, shuffle=False, batchSize=128, validSize=128):
     trainSetPath = 'Datasets//' + dsetName + '.txt'
     testSetPath = 'Datasets//' + dsetName + '_t.txt'
     trainSet = TensorDataset(*loadData(trainSetPath, featureSize))
     testSet = TensorDataset(*loadData(testSetPath, featureSize))
-    trainLoader = DataLoader(trainSet, batch_size=batchSize,
+    trainLoader = DataLoader(trainSet, batch_size=batchSize, shuffle=shuffle,
                              num_workers=0, worker_init_fn=worker_init_fun)
-    validLoader = DataLoader(testSet, batch_size=validSize,
+    validLoader = DataLoader(testSet, batch_size=validSize, shuffle=shuffle,
                              num_workers=0, worker_init_fn=worker_init_fun)
     return trainLoader, validLoader

@@ -31,11 +31,19 @@ if __name__ == '__main__':
     for fileAttribute in fileAttributes:
         dsetName = fileAttribute[0]
         featureSize = fileAttribute[1]
-        tr_loader, te_loader = getDataLoader(dsetName, featureSize)
+        
+        tr_loader, te_loader = getDataLoader(dsetName, featureSize, shuffle=False)
         trainModule('SGD', dsetName, featureSize, alpha, epochs, learning_rate, 
                     tr_loader, te_loader, regularize, device)
+        
         trainModule('SRG', dsetName, featureSize, alpha, epochs, learning_rate, 
                     tr_loader, te_loader, regularize, device)
+        
+        shuffle_tr_loader, shuffle_te_loader = getDataLoader(dsetName, featureSize, shuffle=True)
+        trainModule('SGD', dsetName, featureSize, alpha, epochs, learning_rate, 
+                    shuffle_tr_loader, shuffle_te_loader, regularize, device)
+        
+
     
 # run ijcnn1 : python3.12 main.py
 # run w8a    : python3.12 main.py --dsetName a9a --featureSize 123
