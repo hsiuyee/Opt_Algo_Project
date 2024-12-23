@@ -17,6 +17,8 @@ def combine(seed=69):
     plt.title('Figure 1')
     plt.legend()
     plt.grid(True)
+
+    plt.savefig('figure1.png', dpi=300) 
     plt.show()
 
 if __name__ == '__main__':
