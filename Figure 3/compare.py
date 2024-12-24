@@ -7,7 +7,6 @@ import random
 
 eps = 1e-9
 
-
 def set_seed(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -44,9 +43,9 @@ def parse_libsvm_line(line, num_features):
     return label, features
 
 
-def load_data(file_path1, file_path2, mu=None, num_features=22):
+def load_data(file_path1, file_path2, mu=None, num_features=22, sample_size=1000):
     """
-    從 LIBSVM 格式的 .txt 檔案載入資料。
+    從 LIBSVM 格式的 .txt 文件中載入資料，並隨機抽取 sample_size 筆資料。
     """
     # 讀取 txt 文件
     labels = []
@@ -61,9 +60,14 @@ def load_data(file_path1, file_path2, mu=None, num_features=22):
     A = np.array(features, dtype=np.float32)
     y = np.array(labels, dtype=np.float32)
 
-    # 標準化標籤保持 -1 和 1
-    y = np.where(y == 0, -1, y)
 
+    # 隨機抽樣 1000 筆資料
+    np.random.seed(42)
+    indices = np.random.choice(len(A), sample_size, replace=False)
+    A = A[indices]
+    y = y[indices]
+
+    A = A / np.linalg.norm(A, axis=1, keepdims=True)
     n, d = A.shape
 
     # 載入 x_star
@@ -78,6 +82,7 @@ def load_data(file_path1, file_path2, mu=None, num_features=22):
     print(f"Regularization parameter (mu): {mu}")
 
     return A, y, n, d, mu, x_star
+
 
 
 def SRG(data_path1, data_path2, seed=42, mu=None, num_features=22):
@@ -105,9 +110,9 @@ def SRG(data_path1, data_path2, seed=42, mu=None, num_features=22):
         gradient = compute_gradient(x_old, i_k, A, y, mu)
         x_new = x_old - alpha[k] * gradient / (n * max(p_k[i_k], eps))
 
-        g_new_norm = tf.Variable(g_old_norm)
+        g_new_norm = g_old_norm.numpy()
         if b_k == 1:
-            g_new_norm[i_k].assign(tf.norm(gradient))
+            g_new_norm[i_k] = np.linalg.norm(gradient.numpy())
 
         x_old.assign(x_new)
         g_old_norm.assign(g_new_norm)
@@ -150,7 +155,6 @@ def SGD(data_path1, data_path2, seed=42, mu=None, num_features=22):
     return error_list
 
 
-
 def plot_results(srg_errors, sgd_errors, oracle_calls, output_path="comparison_plot.png"):
     plt.figure(figsize=(10, 6))
     plt.plot(oracle_calls, srg_errors, label='SRG', marker='o', color='green')
@@ -167,8 +171,8 @@ def plot_results(srg_errors, sgd_errors, oracle_calls, output_path="comparison_p
 
 if __name__ == '__main__':
     set_seed(42)
-    data_txt = "data/example.txt"  # 更新為 txt 檔案
-    x_star_csv = "x_star_example.csv"
+    data_txt = "Datasets/ijcnn1.txt"  # 更新為 txt 檔案
+    x_star_csv = "x_star_ijcnn1.csv"
 
     srg_errors = SRG(data_txt, x_star_csv, num_features=22)
     sgd_errors = SGD(data_txt, x_star_csv, num_features=22)

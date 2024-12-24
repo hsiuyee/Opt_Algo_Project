@@ -35,9 +35,6 @@ def load_libsvm_data(file_path, num_features):
     X = np.array(features, dtype=np.float32)
     y = np.array(labels, dtype=np.float32)
 
-    # 標籤轉換為 -1, 1 (若需要調整，可以改回 0, 1)
-    y = np.where(y == 0, -1, y)
-
     return X, y
 
 
