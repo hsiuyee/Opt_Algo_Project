@@ -44,13 +44,13 @@ def load_libsvm_data(file_path, num_features):
 if __name__ == '__main__':
     # 設定檔案名稱和參數
     fileNames = ['ijcnn1', 'mushrooms', 'phishing', 'w8a']
-    num_features_dict = {'ijcnn1': 22, 'mushrooms': 22, 'phishing': 22, 'w8a': 22}  # 特徵數量
+    num_features_dict = {'ijcnn1': 22, 'mushrooms': 112, 'phishing': 68, 'w8a': 300}  # 特徵數量
 
     for fileName in fileNames:
         print(f"Processing {fileName}...")
 
         # 資料路徑與設定
-        file_path = f'data/{fileName}.txt'  # 修改成 txt 格式
+        file_path = f'Datasets/{fileName}.txt'  # 修改成 txt 格式
         num_features = num_features_dict[fileName]
 
         # 載入資料
