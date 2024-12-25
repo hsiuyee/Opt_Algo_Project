@@ -50,12 +50,12 @@ class Logisticmodule:
         module.optimizer = None
         if self.algoType == "SGD":
             module.optimizer = torch.optim.SGD(module.parameters(),
-                                            lr=learning_rate)
+                                               lr=learning_rate)
         
         elif self.algoType == "SRG":
             num_iterations = n * 30
-            alpha_schedule = np.linspace(0.025, 0, num_iterations * 100)
-            theta_schedule = np.linspace(0.5, 0.5, num_iterations * 100)
+            alpha_schedule = np.linspace(0.9, 0.05, num_iterations * 2) #0.2
+            theta_schedule = np.linspace(0.5, 0.5, num_iterations * 2)
             module.optimizer = SRG(module.parameters(),
                                 n=n,
                                 alpha_schedule=alpha_schedule,
@@ -146,7 +146,7 @@ def trainModule(algoType, dsetName, featureSize, alpha, epochs, learning_rate,
         for param in module.parameters():
             param.fill_(1.0)
         for param in validmodule.parameters():
-            param.fill_(1.0)
+            param.fill_(100.0)
     param_history = []  # 用於儲存參數
     cur_weight = copy.deepcopy(module.state_dict())
     param_history.append({k: v.clone().cpu().numpy() for k, v in cur_weight.items()})
