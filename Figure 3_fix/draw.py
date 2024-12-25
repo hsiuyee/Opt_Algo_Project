@@ -60,7 +60,7 @@ def calculate_optimal_gap(fileName, file1, file2, output_file):
 if __name__ == '__main__':
     # fileName = 'ijcnn1'
     fileNames = ['phishing', 'mushrooms', 'w8a', 'ijcnn1']
-    fileNames = ['phishing']
+    # fileNames = ['phishing']
     for fileName in fileNames:
         calculate_optimal_gap(fileName,
                               'SGD_' + fileName + '_params_info.csv', \

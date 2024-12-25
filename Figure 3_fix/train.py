@@ -54,8 +54,8 @@ class Logisticmodule:
         
         elif self.algoType == "SRG":
             num_iterations = n * 30
-            alpha_schedule = np.linspace(0.9, 0.05, num_iterations * 2) #0.2
-            theta_schedule = np.linspace(0.5, 0.5, num_iterations * 2)
+            alpha_schedule = np.linspace(0.9, 0.05, num_iterations * 10) #0.2
+            theta_schedule = np.linspace(0.5, 0.5, num_iterations * 10)
             module.optimizer = SRG(module.parameters(),
                                 n=n,
                                 alpha_schedule=alpha_schedule,

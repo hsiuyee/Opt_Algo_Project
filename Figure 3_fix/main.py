@@ -11,8 +11,8 @@ if __name__ == '__main__':
     train_on_gpu = torch.cuda.is_available()
     device = torch.device("cuda:0" if train_on_gpu else "cpu")
 
-    # fileAttributes = [['phishing', 68], ['mushrooms', 112], ['w8a', 123], ['ijcnn1', 22]]
-    fileAttributes = [['phishing', 68]]
+    fileAttributes = [['phishing', 68], ['mushrooms', 112], ['w8a', 123], ['ijcnn1', 22]]
+    # fileAttributes = [['phishing', 68]]
     # dsetName = 'ijcnn1'
     # featureSize = 22
     
